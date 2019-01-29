@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ys.po.userMapper">
+
+    <!-- 根据 id 查询 user 表中的数据
+       id:唯一标识符，此文件中的id值不能重复
+       resultType:返回值类型，一条数据库记录也就对应实体类的一个对象
+       parameterType:参数类型，也就是查询条件的类型
+    -->
+    <select id="selectUserById"
+            resultType="User" parameterType="int">
+        <!-- 这里和普通的sql 查询语句差不多，对于只有一个参数，后面的 #{id}表示占位符，里面不一定要写id,写啥都可以，但是不要空着，如果有多个参数则必须写pojo类里面的属性 -->
+        select * from user where id = #{id}
+    </select>
+  	
+     
+    <!-- 查询 user 表的所有数据
+        注意：因为是查询所有数据，所以返回的应该是一个集合,这个集合里面每个元素都是User类型
+     -->
+    <select id="selectUserAll" resultType="User">
+        select * from user
+    </select>
+     
+    <!-- 模糊查询：根据 user 表的username字段
+            下面两种写法都可以，但是要注意
+            1、${value}里面必须要写value，不然会报错
+            2、${}表示拼接 sql 字符串，将接收到的参数不加任何修饰拼接在sql语句中
+            3、使用${}会造成 sql 注入
+     -->
+    <select id="selectLikeUserName" resultType="User" parameterType="String">
+        select * from user where username like '%${value}%'
+        <!-- select * from user where username like #{username} -->
+    </select>
+     
+    <!-- 向 user 表插入一条数据 -->
+    <insert id="insertUser" parameterType="User">
+    	<!-- 将插入的数据主键返回到 user 对象中
+             keyProperty:将查询到的主键设置到parameterType 指定到对象的那个属性
+             select LAST_INSERT_ID()：查询上一次执行insert 操作返回的主键id值，只适用于自增主键 / select UUID()：得到主键的id值，注意这里是字符串
+             resultType:指定 select LAST_INSERT_ID() 的结果类型
+             order:AFTER，相对于 select LAST_INSERT_ID()操作的顺序 / BEFORE，相对于 select UUID()操作的顺序
+         -->
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into user(id,username,sex,birthday,address)
+            value(#{id},#{username},#{sex},#{birthday},#{address})
+    </insert>
+     
+    <!-- 根据 id 更新 user 表的数据 -->
+    <update id="updateUserById" parameterType="User">
+        update user set username=#{username} where id=#{id}
+    </update>
+     
+    <!-- 根据 id 删除 user 表的数据 -->
+    <delete id="deleteUserById" parameterType="int">
+        delete from user where id=#{id}
+    </delete>
+   	
+    <!-- 动态sql语句，通过username和sex来查询user表 -->
+    <!-- 
+    <select id="selectUserByUsernameAndSex" resultType="User" parameterType="User">
+    	select * from user where
+    	<if test="username != null">
+    		username=#{username}
+    	</if>
+    	如果username为空，sex不为空的话，这个查询语句是错误的
+    	<if test="sex != null">
+    		and sex=#{sex}
+    	</if>
+    </select>
+    -->
+    <!-- 动态Sql：if+where -->
+    <select id="selectUserByUsernameAndSex" resultType="User" parameterType="User">
+    	select * from user 
+    	<where>
+    		<if test="username != null">
+    			username=#{username}
+    		</if>
+    		<if test="sex != null">
+    		 	and sex=#{sex}
+    		</if>
+    	</where>
+    </select>
+    
+    <!-- 动态Sql：if+set -->
+    <update id="updateUserById2" parameterType="User">
+    	update user u
+    	<set>
+    		<if test="username != null and username != ''">
+    			u.username=#{username},
+    		</if>
+    		<if test="sex != null and sex != ''">
+    			u.sex=#{sex}
+    		</if>
+    	</set>
+    	where id=#{id}
+    </update>
+    
+    <!-- 动态Sql：choose(when,otherwise) 类似与switch语句-->
+    <select id="selectUserByChoose" resultType="User" parameterType="User">
+    	select * fome user
+    	<where>
+    		<choose>
+    			<when test="id != null and id != ''">
+    				id=#{id}
+    			</when>
+    			<when test="username != null and username != ''">
+    				and username=#{username}
+    			</when>
+    			<otherwise>
+    				and sex=#{sex}
+    			</otherwise>
+    		</choose>
+    	</where>
+    </select>
+    
+    <!-- 动态Sql：trim 使用trim改写上面if+where语句-->
+    <select id="selectUserByUsernameAndSexWithTrim" resultType="User" parameterType="User">
+    	select * from user 
+    	<trim prefix="where" prefixOverrides="and | or"><!-- prefix:前缀  prefixOverrides：去掉以第一个and或者or -->
+    		<if test="username != null">
+    			and username=#{username}
+    		</if>
+    		<if test="sex != null">
+    			and sex=#{sex}
+    		</if>
+    	</trim>
+    </select>
+    
+    <!-- 使用trim改写if+set语句 -->
+    <select id="updateUserByIdWithTrim">
+    	update user u
+    	<trim prefix="set" suffixOverrides=","><!-- prefix:后缀  suffixOverrides：去掉最后一个, -->
+    		<if test="username != null and username != ''">
+    			u.username=#{username}
+    		</if>
+    		<if test="sex != null and sex != ''">
+    			u.sex=#{sex}
+    		</if>
+    	</trim>
+    	where id=#{id}
+    </select>
+    
+    <!-- 动态Sql：sql片段 -->
+    <!-- 定义sql片段 -->
+    <sql id="selectUserByUserNameAndSexSQL">
+    	<if test="username != null and username != ''">
+    		AND username=#{username}
+    	</if>
+    	<if test="sex != null and sex != ''">
+    		AND sex=#{sex}
+    	</if>
+    </sql>
+    
+    <!-- 引用sql片段 -->
+    <select id="selectUserByUsernameAndSexInclude" resultType="User" parameterType="User">
+    	select * from user
+    	<trim prefix="where" prefixOverrides="and | or">
+    		<!-- 引用 sql 片段，如果refid 指定的不在本文件中，那么需要在前面加上 namespace -->
+    		<include refid="selectUserByUserNameAndSexSQL"></include>
+    		<!-- 在这里还可以引用其他的 sql 片段 -->
+    	</trim>
+    </select>
+    
+    <!-- 使用foreach改写select * from user where id = 1 or id = 2 or id = 3 -->
+    <select id="selectUserByListIds" parameterType="UserVo" resultType="User">
+    	select * from user 
+    	<where>
+    		<!--
+	            collection:指定输入对象中的集合属性
+	            item:每次遍历生成的对象
+	            open:开始遍历时的拼接字符串
+	            close:结束时拼接的字符串
+	            separator:遍历对象之间需要拼接的字符串
+	            select * from user where 1=1 and (id=1 or id=2 or id=3)
+          	-->
+          	<foreach collection="ids" item="id" open="and (" close=")" separator="or">
+          		id=#{id}
+          	</foreach>
+    	</where>
+    </select>
+    
+    <!-- 使用foreach改写 select * from user where id in(1,2,3) -->
+    <select id="selectUserByListIdsIn" parameterType="UserVo" resultType="User">
+    	select * from user
+    	<where>
+    		<!--
+                collection:指定输入对象中的集合属性
+                item:每次遍历生成的对象
+                open:开始遍历时的拼接字符串
+                close:结束时拼接的字符串
+                separator:遍历对象之间需要拼接的字符串
+                select * from user where 1=1 and id in (1,2,3)
+              -->
+              <foreach collection="ids" item="id" open="and id in (" close=") " separator=",">
+              		#{id}
+              </foreach>
+    	</where>
+    </select>
+</mapper>
