@@ -135,10 +135,10 @@
     	update user u
     	<trim prefix="set" suffixOverrides=","><!-- prefix:后缀  suffixOverrides：去掉最后一个, -->
     		<if test="username != null and username != ''">
-    			u.username=#{username}
+    			u.username=#{username},
     		</if>
     		<if test="sex != null and sex != ''">
-    			u.sex=#{sex}
+    			u.sex=#{sex},
     		</if>
     	</trim>
     	where id=#{id}

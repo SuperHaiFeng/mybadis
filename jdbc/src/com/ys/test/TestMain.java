@@ -13,7 +13,8 @@ public class TestMain {
 //		testUserMapper2();
 //		testOrderOneToOne();
 //		testGetUserByRoleId();
-		testLazy();
+//		testLazy();
+		testTwoCache();
 	}
 	public static void testCRUD() {
 		CRUDTest test = new CRUDTest();
@@ -54,6 +55,12 @@ public class TestMain {
 	public static void testLazy() {
 		TestLazySql testLazySql = new TestLazySql();
 		testLazySql.testLazy();
+	}
+	
+	public static void testTwoCache() throws Exception{
+		TestTwoCache testTwoCache = new TestTwoCache();
+		testTwoCache.testTwoSessionSelect();
+		testTwoCache.testTwoSessionUpdateAndSelect();
 	}
 	
 }

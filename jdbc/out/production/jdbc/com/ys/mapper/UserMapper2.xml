@@ -4,26 +4,38 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
   <mapper namespace="com.ys.mapper.UserMapper2">
+  <!-- 开启二级缓存 -->
+  <!-- 开启本mapper的namespace下的二级缓存
+    type:指定cache接口的实现类的类型，不写type属性，mybatis默认使用PerpetualCache
+    要和ehcache整合，需要配置type为ehcache实现cache接口的类型
+	-->
+  <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
   	<!-- 根据 id 查询 user 表中的数据
        id:唯一标识符，此文件中的id值不能重复
        resultType:返回值类型，一条数据库记录也就对应实体类的一个对象
        parameterType:参数类型，也就是查询条件的类型
     -->
+    <!-- select语句中可以使用 useCache="false" 来设置是否禁止二级缓存,默认是false -->
     <select id="selectUserById" resultType="User" parameterType="int">
     	select * from user where id=#{id}
     </select>
   
   	<update id="updateUserById" parameterType="User">
   		update user u
-  		<trim prefix="set" suffixOverrides=",">
+  		<trim prefix="set" suffixOverrides="," suffix="where id=#{id}">
 	  		<if test="username != null and username != ''">
-	  			u.username=#{username}
+	  			u.username=#{username},
 	  		</if>
 	  		<if test="sex != null and sex != ''">
-	  			u.sex=#{sex}
+	  			u.sex=#{sex},
+	  		</if>
+	  		<if test="birthday != null">
+	  			u.birthday=#{birthday},
+	  		</if>
+	  		<if test="address != null and address.length()>0">
+	  			u.address=#{address},
 	  		</if>
 	  	</trim>
-	  	where id=#{id}
   	</update>
   	
   	<insert id="insertUser" parameterType="com.ys.po.User">

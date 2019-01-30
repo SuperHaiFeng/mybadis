@@ -1,10 +1,16 @@
 package com.ys.po;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class User {
-    private int id;
+//implement Serializable 实现反序列化，如果mybatis开启缓存，二级缓存，必须实现反序列化
+public class User implements Serializable{
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int id;
     private String username;
     private String sex;
     private Date birthday;
