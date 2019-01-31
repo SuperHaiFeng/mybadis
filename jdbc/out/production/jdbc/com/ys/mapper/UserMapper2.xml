@@ -9,7 +9,7 @@
     type:指定cache接口的实现类的类型，不写type属性，mybatis默认使用PerpetualCache
     要和ehcache整合，需要配置type为ehcache实现cache接口的类型
 	-->
-  <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+ <!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
   	<!-- 根据 id 查询 user 表中的数据
        id:唯一标识符，此文件中的id值不能重复
        resultType:返回值类型，一条数据库记录也就对应实体类的一个对象
