@@ -1,0 +1,3 @@
+# mybadis
+mybatis的使用
+如果使用本项目，需要使用mysql在本地创建一个mybatisDemo数据库，在数据库中创建4个表，表的结构请移步sqlimg文件查看
